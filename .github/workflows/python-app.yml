@@ -34,5 +34,5 @@ jobs:
          make run &
          sleep 10
     - name: Test with pytest
-        run: |
-          pytest
+      run: |
+         pytest
