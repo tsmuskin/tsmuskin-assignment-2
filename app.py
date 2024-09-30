@@ -42,7 +42,6 @@ def findFarthest(data, k):
         next_center_idx = np.argmax(distances)
         centers.append(data[next_center_idx])
     k_centers = np.copy(centers)
-    ## WRITE LOGIC HERE!
     return k_centers
 
 def findKMeansPlusPlus(data,k):
