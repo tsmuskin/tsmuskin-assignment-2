@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KMeans Clustering Algorithm</title>
+    <script src="https:cdn.plot.ly/plotly-latest.min.js"></script>
+
+</head>
+<body>
+<h1>KMeans Clustering Algorithm</h1>
+<form method="POST">
+
+    <!-- Number of points  -->>
+    <label for="n_points">Number of Points</label>
+    <input type="number" id="n_points" name="n_points" value="{{ number }}" required><br><br>
+
+    <!-- Number input for k clusters  -->>
+    <label for="k">Number of Clusters (k)</label>
+    <input type="number" id="k" name="k" value = "{{ k_value }}"><br><br>
+
+    <!-- Dropdown for initializing  -->
+    <label for="init_method">Initialization Method:</label>
+    <select id="init_method" name="init_method">
+        <option value="random" {% if selected_method == 'random' %}selected{% endif %}>Random</option>
+        <option value="farthest" {% if selected_method == 'farthest' %}selected{% endif %}>Farthest First</option>
+        <option value="kmeans++" {% if selected_method == 'kmeans++' %}selected{% endif %}>KMeans++</option>
+        <option value="manual" {% if selected_method == 'manual' %}selected{% endif %}>Manual</option>
+    </select><br><br>
+
+    <!-- After id="" write disabled to enable/disable it -->
+    <button type="submit" name="action" value="step" id="step">Step Through KMeans</button>
+    <button type="submit" name="action" value="run" id="run">Run to Convergence</button>
+    <button type="submit" name="action" value="generate" id="generate">Generate New Dataset</button>
+    <button type="submit" name="action" value="reset" id="reset">Reset Algorithm</button>
+
+    <input type="hidden" id="selected_points" name="selected_points" value="">
+
+</form>
+
+<!-- Div to display the Plotly plot -->
+<div id="plot" style="width: 600px; height: 600px;"></div>
+{% if graphJSON %}
+<script>
+
+    var plotData = {{ graphJSON | safe}};
+    Plotly.newPlot('plot', plotData);
+
+    var initMethod = "{{ selected_method }}";
+    var kValue = parseInt(document.getElementById('k').value)
+
+    var selectedPoints = [];
+
+    if (initMethod === 'manual') {
+
+        document.getElementById('plot').on('plotly_click', function(eventData) {
+            if (selectedPoints.length < kValue) {
+                var point = eventData.points[0];
+                var x = point.x;
+                var y = point.y;
+
+                selectedPoints.push({ x: x, y: y })
+                console.log('Clicked point:', point.x, point.y);
+                alert('Selected point ' + selectedPoints.length + ': (' + x + ', ' + y + ')');
+                // Here, you can store clicked points and send them to the server in the form
+                if (selectedPoints.length === kValue) {
+                    alert('You have selected ' + kValue + ' points.');
+                    // Update hidden input with selected points
+                    document.getElementById('selected_points').value = JSON.stringify(selectedPoints);
+                }
+            } else {
+                alert('You have already selected ' + kValue + ' points.');
+            }
+
+            if (selectedPoints.length > 0) {
+                document.getElementById('selected_points').value = JSON.stringify(selectedPoints);
+
+            }
+        });
+    //     var clickedPoints = [];
+
+    //     var plotElement = document.getElementById('plot');
+    //     plotElement.on('click', function(event) {
+    //     var x = event.points[0].x;  // Get x-coordinate of the click
+    //     var y = event.points[0].y;  // Get y-coordinate of the click
+
+    //     // Store clicked point in the array
+    //     clickedPoints.push({x: x, y: y});
+
+    //     // Alert the clicked points (for debugging, you can remove this later)
+    //     alert('Selected points: ' + JSON.stringify(clickedPoints));
+    // });
+    }
+
+
+    document.getElementById('kmeansForm').onsubmit = function() {
+        if (initMethod === 'manual') {
+            if  (selectedPoints.length !== kValue) {
+                alert('Please select exactly ' + kValue + ' points before submitting.');
+                return false;
+            }
+        }
+        return true;  // Allow form submission if the correct number of points are selected
+    };
+
+</script>
+{% endif %}
+
+</body>
+</html>
